@@ -9,4 +9,8 @@ public interface KWHashMap<K, V> {
     V remove(Object key);
 
     int size();
+
+    String toString();
+
+    void rehash();
 }
