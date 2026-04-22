@@ -21,13 +21,37 @@ public class Compress {
         
         // dynamically create dictionary of an optimal size
         long fileSize = f.length();
-            // implement this...
+        int tableSize;
+        if (fileSize < 10000) {
+            tableSize = 101;
+        }
+        else if (fileSize >= 1000 && fileSize < 1000000) {
+            tableSize = 1009;
+        }
+        else {
+            tableSize = 10007;
+        }
+
+        // create hash table
+        HashTableChain<String, Integer> table = new HashTableChain<String, Integer>(tableSize);
 
         // create FileReader object
         try {
+            // loop through the first time to initialize the dictionary with characters
             FileReader input = new FileReader(f);
+            char ch;
+            while((ch = (char)input.read()) != -1) {
+                // increase currentValue for every character add to the table
+                int currentValue = 0;
+                if (table.get(ch) != null) {
+                    table.put(String.valueOf(ch), currentValue);
+                    currentValue++;
+                }
+            }
+            input.close();
 
-            
+            // loop through again and compress string. add output to new file.
+
         }
         catch (FileNotFoundException e) {
             System.out.println("Error: file not found");
