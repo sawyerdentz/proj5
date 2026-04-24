@@ -40,10 +40,10 @@ public class Compress {
             // loop through the first time to initialize the dictionary with characters
             FileReader input = new FileReader(f);
             char ch;
+            int currentValue = 0;
             while((ch = (char)input.read()) != -1) {
                 // increase currentValue for every character add to the table
-                int currentValue = 0;
-                if (table.get(ch) != null) {
+                if (table.get(ch) == null) {
                     table.put(String.valueOf(ch), currentValue);
                     currentValue++;
                 }
@@ -51,6 +51,36 @@ public class Compress {
             input.close();
 
             // loop through again and compress string. add output to new file.
+            // create ObjectOutputStream
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename + ".zzz"));
+
+            input = new FileReader(f); // initialize new file to read again
+            String longestString = "";
+            char current;
+            // loop through file
+            while((current = (char)input.read()) != -1) {
+                longestString += current;
+                // if the longestString is not in the table, add it with the current value
+                if (table.get(longestString) == null) {
+                    table.put(longestString, currentValue);
+                    currentValue++;
+
+                    // add longest value without last char to compressed file
+                    out.writeInt(table.get(longestString.substring(0,longestString.length()-1)));
+
+
+
+                    // reset longest string to current char
+                    longestString = String.valueOf(current);
+                }
+            }
+            // add last string after looping through whole file
+            out.writeInt(table.get(longestString));
+
+            // close files
+            input.close();
+            out.close();
+
 
         }
         catch (FileNotFoundException e) {
@@ -63,6 +93,9 @@ public class Compress {
         catch (IOException e) {
             System.out.println("Error: IO exception");
         }
+
+        // close scanner
+        sc.close();
 
     }
 }
