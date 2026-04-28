@@ -1,5 +1,6 @@
-import java.util.Scanner;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Compress {
     public static void main(String[] args) {
@@ -33,54 +34,62 @@ public class Compress {
         }
 
         // create hash table
-        HashTableChain<String, Integer> table = new HashTableChain<String, Integer>(tableSize);
+        HashTableChain<String, Integer> table = new HashTableChain<>(tableSize);
 
-        // create FileReader object
         try {
             // loop through the first time to initialize the dictionary with characters
-            FileReader input = new FileReader(f);
-            char ch;
             int currentValue = 0;
-            while((ch = (char)input.read()) != -1) {
-                // increase currentValue for every character add to the table
-                if (table.get(ch) == null) {
-                    table.put(String.valueOf(ch), currentValue);
-                    currentValue++;
+            ArrayList<String> initialDict = new ArrayList<>();
+
+            try (FileReader input = new FileReader(f)) {
+                char ch;
+                while ((ch = (char)input.read()) != -1) {
+                    // increase currentValue for every character add to the table
+                    if (table.get(ch) == null) {
+                        String s = String.valueOf(ch);
+                        table.put(s, currentValue);
+                        initialDict.add(s);
+                        currentValue++;
+                    }
                 }
             }
-            input.close();
 
-            // loop through again and compress string. add output to new file.
             // create ObjectOutputStream
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename + ".zzz"));
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename + ".zzz"));
+                 FileReader input = new FileReader(f)) {
 
-            input = new FileReader(f); // initialize new file to read again
-            String longestString = "";
-            char current;
-            // loop through file
-            while((current = (char)input.read()) != -1) {
-                longestString += current;
-                // if the longestString is not in the table, add it with the current value
-                if (table.get(longestString) == null) {
-                    table.put(longestString, currentValue);
-                    currentValue++;
-
-                    // add longest value without last char to compressed file
-                    out.writeInt(table.get(longestString.substring(0,longestString.length()-1)));
-
-
-
-                    // reset longest string to current char
-                    longestString = String.valueOf(current);
+                // add initial dictionary to compressed file
+                // write number of initial entries followed by each string in insertion order
+                out.writeInt(initialDict.size());
+                for (String s : initialDict) {
+                    out.writeUTF(s);
                 }
+
+                // loop through again and compress string. add output to new file.
+                String longestString = "";
+                char current;
+                // loop through file
+                while ((current = (char) input.read()) != -1) {
+                    longestString += current;
+                    // if the longestString is not in the table, add it with the current value
+                    if (table.get(longestString) == null) {
+                        table.put(longestString, currentValue);
+                        currentValue++;
+
+                        // add longest value without last char to compressed file
+                        Integer previousValue = table.get(longestString.substring(0, longestString.length() - 1));
+                        if (previousValue == null) {
+                            throw new IOException("Missing dictionary entry for prefix: " + longestString.substring(0, longestString.length() - 1));
+                        }
+                        out.writeInt(previousValue);
+
+                        // reset longest string to current char
+                        longestString = String.valueOf(current);
+                    }
+                }
+                // add last string after looping through whole file
+                out.writeInt(table.get(longestString));
             }
-            // add last string after looping through whole file
-            out.writeInt(table.get(longestString));
-
-            // close files
-            input.close();
-            out.close();
-
 
         }
         catch (FileNotFoundException e) {
