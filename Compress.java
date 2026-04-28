@@ -72,31 +72,37 @@ public class Compress {
                         longestString += current;
                         // if the longestString is not in the table, add it with the current value
                         if (table.get(longestString) == null) {
-                            table.put(longestString, currentValue);
-                            currentValue++;
-
                             // add longest value without last char to compressed file
-                            Integer previousValue = table.get(longestString.substring(0, longestString.length() - 1));
+                            String prefix = longestString.substring(0, longestString.length() - 1);
+                            Integer previousValue = table.get(prefix);
                             if (previousValue == null) {
-                                throw new IOException("Missing dictionary entry for prefix: " + longestString.substring(0, longestString.length() - 1));
+                                throw new IOException("Missing dictionary entry for prefix: " + prefix);
                             }
                             out.writeInt(previousValue);
 
+                            table.put(longestString, currentValue);
+                            currentValue++;
+
                             // reset longest string to current char
-                            longestString = String.valueOf(current);
+                            longestString = "" + current;
                         }
                     }
                     // add last string after looping through whole file
-                    out.writeInt(table.get(longestString));
+                    if (!longestString.isEmpty()) {
+                        out.writeInt(table.get(longestString));
+                    }
                 }
 
             } catch (FileNotFoundException e) {
                 System.out.println("Error: file not found");
+                e.printStackTrace();
                 System.exit(1);
             } catch (EOFException e) {
                 System.out.println("Error: end of file exception");
+                e.printStackTrace();
             } catch (IOException e) {
                 System.out.println("Error: IO exception");
+                e.printStackTrace();
             }
 
             // close scanner
