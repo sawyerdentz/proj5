@@ -1,6 +1,7 @@
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.math.BigInteger;
 
 
 public class HashTableChain<K,V> implements KWHashMap<K,V> {
@@ -43,13 +44,14 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     // hash table data
     private LinkedList<Entry<K,V>>[] table;
     private int numKeys = 0;
-    private static final int CAPACITY = 101;
-    private static final double LOAD_THRESHOLD = 1;
+    private static int capacity = 101;
+    // load_factor = num_keys/capacity
+    private static final double LOAD_THRESHOLD = 0.75;
 
 
     // constructors
     public HashTableChain() {
-        table = new LinkedList[CAPACITY];
+        table = new LinkedList[capacity];
         numKeys = 0;
     }
 
@@ -57,6 +59,34 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     public HashTableChain(int cap) {
         table = new LinkedList[cap];
         numKeys = 0;
+    }
+
+
+    public void rehash() {
+        // double the capacity to lower load factor and find next prime to prevent collisions
+        BigInteger number = BigInteger.valueOf(capacity * 2);
+        int newCapacity = number.nextProbablePrime().intValue();
+        LinkedList<Entry<K,V>>[] newTable = new LinkedList[newCapacity];
+        // loop through old table and rehash entries into new table
+        for (LinkedList<Entry<K,V>> table_bin : table) {
+            if (table_bin != null) {
+                for (Entry<K,V> nextEntry : table_bin) {
+                    int newIndex = Math.abs(nextEntry.key.hashCode() % newCapacity);
+
+
+                    if (newTable[newIndex] == null) {
+                        newTable[newIndex] = new LinkedList<>();
+                    }
+
+
+                    newTable[newIndex].add(nextEntry);
+                }
+            }
+        // need to use a set table method
+        table = newTable;
+        capacity = newCapacity;
+           
+        }
     }
 
 
@@ -100,32 +130,57 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
                 return old_val;
             }
         }
-
-
         // key not found, so insert new key-value pair
         table[index].add(new Entry<K,V>(key, value));
         numKeys += 1;
-        if (numKeys / CAPACITY > LOAD_THRESHOLD) {
-            // rehash
+        if (((float)numKeys/(float)capacity) > LOAD_THRESHOLD) {
             rehash();
         }
         return null;
         }
 
 
+        public V remove(Object key) {
+            // get index in hash table
+            int index = key.hashCode() % table.length;
+            if (index < 0) {
+                index += table.length;
+            }
+
+
+            if (table[index] == null) {
+                return null;
+            }
+
+
+            for (Entry<K,V> nextEntry : table[index]) {
+                if (nextEntry.getKey().equals(key)) {
+                V old_val = nextEntry.getValue();
+                nextEntry.setValue(null);
+                return old_val;
+                }
+            }
+            return null;
+        }
+
+
+        public int size() {
+            return capacity;
+
+
+        }
+
+
         public boolean isEmpty() {
-           
+            if (numKeys == 0) {
+                return true;
+            }
             return false;
 
 
         }
 
-        public void rehash() {
-
-        }
-
-        
-       
-
 
     }
+
+
