@@ -1,7 +1,5 @@
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.math.BigInteger;
+import java.util.LinkedList;
 
 
 public class HashTableChain<K,V> implements KWHashMap<K,V> {
@@ -35,6 +33,7 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
         }
 
 
+        @Override
         public String toString() {
             return key.toString() + "=" + value.toString();
         }
@@ -50,22 +49,26 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
 
 
     // constructors
+    @SuppressWarnings("unchecked")
     public HashTableChain() {
         table = new LinkedList[capacity];
         numKeys = 0;
     }
 
 
+    @SuppressWarnings("unchecked")
     public HashTableChain(int cap) {
         table = new LinkedList[cap];
         numKeys = 0;
     }
 
 
+    @Override
     public void rehash() {
         // double the capacity to lower load factor and find next prime to prevent collisions
         BigInteger number = BigInteger.valueOf(capacity * 2);
         int newCapacity = number.nextProbablePrime().intValue();
+        @SuppressWarnings("unchecked")
         LinkedList<Entry<K,V>>[] newTable = new LinkedList[newCapacity];
         // loop through old table and rehash entries into new table
         for (LinkedList<Entry<K,V>> table_bin : table) {
@@ -82,14 +85,14 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
                     newTable[newIndex].add(nextEntry);
                 }
             }
+        }
         // need to use a set table method
         table = newTable;
         capacity = newCapacity;
-           
-        }
     }
 
 
+    @Override
     public V get(Object key) {
         // get index in hash table
         int index = key.hashCode() % table.length;
@@ -110,6 +113,7 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     }
 
 
+    @Override
     public V put(K key, V value) {
         // get index in hash table
         int index = key.hashCode() % table.length;
@@ -131,54 +135,52 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
             }
         }
         // key not found, so insert new key-value pair
-        table[index].add(new Entry<K,V>(key, value));
+        table[index].add(new Entry<>(key, value));
         numKeys += 1;
         if (((float)numKeys/(float)capacity) > LOAD_THRESHOLD) {
             rehash();
         }
         return null;
+    }
+
+
+    @Override
+    public V remove(Object key) {
+        // get index in hash table
+        int index = key.hashCode() % table.length;
+        if (index < 0) {
+            index += table.length;
         }
 
 
-        public V remove(Object key) {
-            // get index in hash table
-            int index = key.hashCode() % table.length;
-            if (index < 0) {
-                index += table.length;
-            }
-
-
-            if (table[index] == null) {
-                return null;
-            }
-
-
-            for (Entry<K,V> nextEntry : table[index]) {
-                if (nextEntry.getKey().equals(key)) {
-                V old_val = nextEntry.getValue();
-                nextEntry.setValue(null);
-                return old_val;
-                }
-            }
+        if (table[index] == null) {
             return null;
         }
 
 
-        public int size() {
-            return capacity;
-
-
-        }
-
-
-        public boolean isEmpty() {
-            if (numKeys == 0) {
-                return true;
+        for (Entry<K,V> nextEntry : table[index]) {
+            if (nextEntry.getKey().equals(key)) {
+                V old_val = nextEntry.getValue();
+                nextEntry.setValue(null);
+                return old_val;
             }
-            return false;
-
-
         }
+        return null;
+    }
+
+
+    @Override
+    public int size() {
+        return capacity;
+
+
+    }
+
+
+    @Override
+    public boolean isEmpty() {
+        return (numKeys == 0);
+    }
 
 
     }

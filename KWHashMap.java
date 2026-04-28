@@ -10,6 +10,7 @@ public interface KWHashMap<K, V> {
 
     int size();
 
+    @Override
     String toString();
 
     void rehash();
