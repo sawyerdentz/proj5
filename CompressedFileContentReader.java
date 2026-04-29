@@ -54,6 +54,7 @@ public class CompressedFileContentReader {
                     System.out.println("Error Closing");
                 }
             }
-        }  
+        }
+        sc.close();
     }
 }
