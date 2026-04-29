@@ -1,4 +1,5 @@
 import java.io.*;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -21,17 +22,19 @@ public class Compress {
         
             // dynamically create dictionary of an optimal size
             long fileSize = f.length();
-            int tableSize;
-            if (fileSize < 10000) {
-                tableSize = 101;
-            } else if (fileSize >= 1000 && fileSize < 1000000) {
-                tableSize = 1009;
-            } else {
-                tableSize = 10007;
-            }
+            int tableSize = BigInteger.valueOf((int) fileSize / 8).nextProbablePrime().intValue();
+
+            // if (fileSize < 10000) {
+            //     tableSize = 101;
+            // } else if (fileSize >= 1000 && fileSize < 1000000) {
+            //     tableSize = 1009;
+            // } else {
+            //     tableSize = 10007;
+            // }
 
             // create hash table
             HashTableChain<String, Integer> table = new HashTableChain<>(tableSize);
+
 
             try {
                 // loop through the first time to initialize the dictionary with characters
@@ -79,6 +82,7 @@ public class Compress {
                                 throw new IOException("Missing dictionary entry for prefix: " + prefix);
                             }
                             out.writeInt(previousValue);
+                            System.out.println(previousValue);
 
                             table.put(longestString, currentValue);
                             currentValue++;
@@ -89,7 +93,9 @@ public class Compress {
                     }
                     // add last string after looping through whole file
                     if (!longestString.isEmpty()) {
-                        out.writeInt(table.get(longestString));
+                        Integer value = table.get(longestString);
+                        out.writeInt(value);
+                        System.out.println(value);
                     }
                 }
 

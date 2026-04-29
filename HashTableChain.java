@@ -58,6 +58,7 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
 
     @SuppressWarnings("unchecked")
     public HashTableChain(int cap) {
+        capacity = cap;
         table = new LinkedList[cap];
         numKeys = 0;
     }
