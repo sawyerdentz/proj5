@@ -13,7 +13,6 @@ public class Compress {
                 filename = args[0];
             }
 
-
             // make sure the file exists, if not prompt user for new filename
             File f = new File(filename);
             while (!f.exists() || !f.isFile()) {
@@ -25,14 +24,6 @@ public class Compress {
             // dynamically create dictionary of an optimal size
             long fileSize = f.length();
             int tableSize = BigInteger.valueOf((int) fileSize / 8).nextProbablePrime().intValue();
-            // if (fileSize < 10000) {
-            //     tableSize = 101;
-            // } else if (fileSize >= 1000 && fileSize < 1000000) {
-            //     tableSize = 1009;
-            // } else {
-            //     tableSize = 10007;
-            // }
-
 
             // create hash table
             HashTableChain<String, Integer> table = new HashTableChain<>(tableSize);
