@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 public class HashTableChain<K,V> implements KWHashMap<K,V> {
 
-
     // internal class defines an entry in the hash table chain
     public static class Entry<K,V> {
         private final K key;
@@ -43,6 +42,7 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     // hash table data
     private LinkedList<Entry<K,V>>[] table;
     private int numKeys = 0;
+    private int rehashed = 0;
     private static int capacity = 101;
     // load_factor = num_keys/capacity
     private static final double LOAD_THRESHOLD = 0.75;
@@ -53,6 +53,7 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     public HashTableChain() {
         table = new LinkedList[capacity];
         numKeys = 0;
+        rehashed = 0;
     }
 
 
@@ -61,11 +62,13 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
         capacity = cap;
         table = new LinkedList[cap];
         numKeys = 0;
+        rehashed = 0;
     }
 
 
     @Override
     public void rehash() {
+        rehashed += 1;
         // double the capacity to lower load factor and find next prime to prevent collisions
         BigInteger number = BigInteger.valueOf(capacity * 2);
         int newCapacity = number.nextProbablePrime().intValue();
@@ -78,9 +81,13 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
                     int newIndex = Math.abs(nextEntry.key.hashCode() % newCapacity);
 
 
+
+
                     if (newTable[newIndex] == null) {
                         newTable[newIndex] = new LinkedList<>();
                     }
+
+
 
 
                     newTable[newIndex].add(nextEntry);
@@ -90,6 +97,11 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
         // need to use a set table method
         table = newTable;
         capacity = newCapacity;
+    }
+   
+
+    public int getRehashed() {
+        return rehashed;
     }
 
 
@@ -122,7 +134,6 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
             index += table.length;
         }
 
-
         if (table[index] == null) {
             table[index] = new LinkedList<>();
         }
@@ -153,11 +164,9 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
             index += table.length;
         }
 
-
         if (table[index] == null) {
             return null;
         }
-
 
         for (Entry<K,V> nextEntry : table[index]) {
             if (nextEntry.getKey().equals(key)) {
@@ -173,17 +182,17 @@ public class HashTableChain<K,V> implements KWHashMap<K,V> {
     @Override
     public int size() {
         return capacity;
-
-
     }
 
 
+    public int getNumKeys() {
+        return numKeys;
+    }
+
+    
     @Override
     public boolean isEmpty() {
         return (numKeys == 0);
     }
 
-
-    }
-
-
+}
