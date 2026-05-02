@@ -1,17 +1,21 @@
-Script started on 2026-05-01 20:50:14-07:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="318" LINES="22"]
-[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Compress test_files/test.txt 
-[?2004l[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Compress
-[?2004lPlease input a valid filename:
+Script started on 2026-05-01 21:24:38-07:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="318" LINES="22"]
+[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Compress test_files/test.txt
+[?2004lWould you like to run again: (y for yes, n for no)
+>> y
+Please input a valid filename:
 >> t
 Please input a valid filename:
->> test_fu iles/test.txt
-[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Decompress test_files/test.txt.zzz
-[?2004l[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Decompress
+>> test_files/test.txt
+Would you like to run again: (y for yes, n for no)
+>> n
+[?2004hsdentz@mh162dl11:~/comp230/proj5$ java Decompress test.txt
 [?2004lPlease input a valid filename:
->> t
+>> test_files/test.txt
 Please input a valid filename:
->> test	_f	      test_files/test.txt.zzz
+>> test_files/text.t    st.txt.zzz
+Would you like to run again? (y for yes, n for no)
+>> n
 [?2004hsdentz@mh162dl11:~/comp230/proj5$ exit
 [?2004lexit
 
-Script done on 2026-05-01 20:51:35-07:00 [COMMAND_EXIT_CODE="0"]
+Script done on 2026-05-01 21:25:59-07:00 [COMMAND_EXIT_CODE="0"]
