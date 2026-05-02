@@ -1,3 +1,9 @@
+/*
+This program implements the KWHashMap interface. It defines a chained hash table designed to be used for compressing files.
+Created by Sawyer Dentz and Cavin Nguyen
+Last modified 5/1/2026
+*/
+
 import java.math.BigInteger;
 import java.util.LinkedList;
 

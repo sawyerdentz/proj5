@@ -1,3 +1,10 @@
+/*
+This program decompresses files using hashing techniques. The program reads in a file specified by a name given by the user through a command line interface.
+The program generates a decompressed text file using an ideal hashing technique with the size also being dynamically adjusted. A log file is produced with key metrics.
+Created by Sawyer Dentz and Cavin Nguyen
+Last modified: 5/1/2026
+*/
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;

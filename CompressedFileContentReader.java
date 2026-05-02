@@ -1,3 +1,10 @@
+/*
+This program reads out the data stored in a compressed file. It is designed to be used in order to verify that a file was compressed correctly.
+It does not decompress the file.
+Created by Sawyer Dentz and Cavin Nguyen
+Last modified 5/1/2026
+*/
+
 
 import java.io.EOFException;
 import java.io.FileInputStream;

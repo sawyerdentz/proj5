@@ -1,3 +1,11 @@
+/*
+This program compresses files using hashing techniques. The program reads in a file specified by a name given by the user through a command line interface.
+The program generates a compressed file with a ".zzz" extension. The algorithm uses a chained hash table to store dictionary entries allowing efficient handling of collisions and clustering.
+The hash tables capacity is dynamically determined based on the number of bytes in the file. The program also generates a log file, recoding key metrics.
+Created by Sawyer Dentz and Cavin Nguyen
+Last modified: 5/1/2026
+*/
+
 import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
