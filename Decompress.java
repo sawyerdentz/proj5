@@ -10,104 +10,119 @@ public class Decompress {
             if (args.length == 1) {
                 filename = args[0];
             }
-
-            // make sure the file exists, if not prompt user for new filename
             File f = new File(filename);
-            while (!f.exists() || !f.isFile() || !filename.substring(filename.length()-4).equals(".zzz")) {
-                System.out.print("Please input a valid filename:\n>> ");
-                filename = sc.nextLine();
-                f = new File(filename);
-            }
 
-            // create hash table
-            ArrayList<String> table = new ArrayList<>();
+            boolean runAgain;
+            do {
+                // make sure the file exists, if not prompt user for new filename
+                while (!f.exists() || !f.isFile() || !filename.substring(filename.length()-4).equals(".zzz")) {
+                    System.out.print("Please input a valid filename:\n>> ");
+                    filename = sc.nextLine();
+                    f = new File(filename);
+                }
 
-            // initialize log data
-            long start = 0;
-            long end = 0;
-            int timesDoubled = 0;
+                // create hash table
+                ArrayList<String> table = new ArrayList<>();
 
-            // create output file
-            try (PrintWriter output = new PrintWriter(filename.substring(0,filename.length()-4))) {
-            
-                // read input file
-                ObjectInputStream in = null;
-                try {
-                    in = new ObjectInputStream(new FileInputStream(f));
-                    // loop through file
+                // initialize log data
+                long start = 0;
+                long end = 0;
+                int timesDoubled = 0;
+
+                // create output file
+                try (PrintWriter output = new PrintWriter(filename.substring(0,filename.length()-4))) {
+                
+                    // read input file
+                    ObjectInputStream in = null;
                     try {
-                        start = System.currentTimeMillis();
-                        // get size of initial dictionary
-                        int dictSize = in.readInt();
-                        // loop through initial dict and add entries to table
-                        for (int i = 0; i < dictSize; i++) {
-                            String entry = in.readUTF();
-                            table.add(entry);
-                        }
-
-                        // decompress data
-                        int previousKey = -1;
-                        while (true) { 
-                            int key = in.readInt();
-                            // if the key is not in the table
-                            if (key > table.size() - 1) {
-                                // add new code to table and append to output file
-                                table.add(table.get(previousKey) + table.get(previousKey).charAt(0));
-                                output.append(table.get(key));
-                                previousKey = key;
-
+                        in = new ObjectInputStream(new FileInputStream(f));
+                        // loop through file
+                        try {
+                            start = System.currentTimeMillis();
+                            // get size of initial dictionary
+                            int dictSize = in.readInt();
+                            // loop through initial dict and add entries to table
+                            for (int i = 0; i < dictSize; i++) {
+                                String entry = in.readUTF();
+                                table.add(entry);
                             }
-                            // if the key is in the table
-                            else {
-                                // append the code to the output file
-                                output.append(table.get(key));
-                                // if this is not the first code
-                                if (previousKey != -1) {
-                                    table.add(table.get(previousKey) + table.get(key).charAt(0));
+
+                            // decompress data
+                            int previousKey = -1;
+                            while (true) { 
+                                int key = in.readInt();
+                                // if the key is not in the table
+                                if (key > table.size() - 1) {
+                                    // add new code to table and append to output file
+                                    table.add(table.get(previousKey) + table.get(previousKey).charAt(0));
+                                    output.append(table.get(key));
+                                    previousKey = key;
+
                                 }
-                                previousKey = key;
+                                // if the key is in the table
+                                else {
+                                    // append the code to the output file
+                                    output.append(table.get(key));
+                                    // if this is not the first code
+                                    if (previousKey != -1) {
+                                        table.add(table.get(previousKey) + table.get(key).charAt(0));
+                                    }
+                                    previousKey = key;
+                                }
+                            }
+                            
+                        }
+                        catch (EOFException e) {
+                            // reached end of file
+                            end = System.currentTimeMillis();
+                        }
+                    }
+                    catch (FileNotFoundException e) {
+                        System.out.println(e.getMessage());
+                        System.exit(1);
+                    }
+                    catch (IOException e) {
+                        System.out.println(e.getMessage());
+                        System.exit(1);
+                    }
+                    finally { 
+                        if (in != null) { 
+                            try { 
+                                in.close();
+                            }
+                            catch(IOException e) { 
+                                System.out.println("Error Closing");
                             }
                         }
-                        
-                    }
-                    catch (EOFException e) {
-                        // reached end of file
-                        end = System.currentTimeMillis();
                     }
                 }
                 catch (FileNotFoundException e) {
                     System.out.println(e.getMessage());
                     System.exit(1);
                 }
-                catch (IOException e) {
+                // log data
+                try (PrintWriter outputLog = new PrintWriter(new FileOutputStream(filename.substring(0,filename.length()-4) + ".log"))) {
+                    outputLog.println("Decompression for file " + filename);
+                    outputLog.println("Decompression took " + ((float) (end - start)/1000.0) + " seconds.");
+                    outputLog.println("The table was doubled " + timesDoubled + " times.");
+                }
+                catch (FileNotFoundException e) {
                     System.out.println(e.getMessage());
                     System.exit(1);
                 }
-                finally { 
-                    if (in != null) { 
-                        try { 
-                            in.close();
-                        }
-                        catch(IOException e) { 
-                            System.out.println("Error Closing");
-                        }
-                    }
+                // prompt user to run again
+                System.out.print("Would you like to run again? (y for yes, n for no)\n>> ");
+                String response = sc.nextLine();
+                if (response.equalsIgnoreCase("y")) {
+                    runAgain = true;
+                    System.out.print("Please input a valid filename:\n>> ");
+                    filename = sc.nextLine();
+                    f = new File(filename);
                 }
-            }
-            catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
-            // log data
-            try (PrintWriter outputLog = new PrintWriter(new FileOutputStream(filename.substring(0,filename.length()-4) + ".log"))) {
-                outputLog.println("Decompression for file " + filename);
-                outputLog.println("Decompression took " + ((float) (end - start)/1000.0) + " seconds.");
-                outputLog.println("The table was doubled " + timesDoubled + " times.");
-            }
-            catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
+                else {
+                    runAgain = false;
+                }
+            } while (runAgain);
         }
     }   
 }
